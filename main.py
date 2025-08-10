@@ -12,6 +12,7 @@ from data_handler import (
     get_current_price,
     TIMEFRAMES
 )
+from trading.utils import rebalance_portfolio, get_portfolio_summary, validate_allocations
 from config import config
 import MetaTrader5 as mt5
 
@@ -37,36 +38,40 @@ def main():
     print("✅ MT5 connection established successfully")
     
     try:
-        # Example 1: Get current price for EUR/USD
-        symbol = "EURUSD"
-        print(f"\n📊 Getting current price for {symbol}...")
+        # Example: Get portfolio summary
+        print("\n📊 Getting current portfolio summary...")
+        summary = get_portfolio_summary()
         
-        current_price = get_current_price(symbol)
-        if current_price:
-            print(f"   Bid: {current_price['bid']:.5f}")
-            print(f"   Ask: {current_price['ask']:.5f}")
-            print(f"   Spread: {(current_price['ask'] - current_price['bid']):.5f}")
+        if "error" not in summary:
+            print(f"Account Balance: ${summary.get('account_balance', 0):,.2f}")
+            print(f"Account Equity: ${summary.get('account_equity', 0):,.2f}")
+            print(f"Open Positions: {summary.get('number_of_positions', 0)}")
         else:
-            print(f"   ❌ Failed to get current price for {symbol}")
+            print(f"Error getting portfolio summary: {summary['error']}")
         
-        # Example 2: Get historical data
-        print(f"\n📈 Getting historical data for {symbol}...")
+        # Example: Portfolio rebalancing (dry run)
+        print("\n🎯 Example portfolio rebalancing...")
+        target_allocations = [
+            ("EURUSD", 0.4),   # 40% EUR/USD
+            ("GBPUSD", 0.3),   # 30% GBP/USD
+            ("USDJPY", 0.2),   # 20% USD/JPY
+            ("AUDUSD", 0.1),   # 10% AUD/USD
+        ]
         
-        # Get last 50 H1 bars
-        df = get_symbol_data(
-            symbol=symbol,
-            timeframe=TIMEFRAMES['H1'],
-            count=50
-        )
+        # Perform dry run
+        results = rebalance_portfolio(target_allocations, dry_run=True)
         
-        if df is not None and len(df) > 0:
-            print(f"   ✅ Retrieved {len(df)} hourly bars")
-            print(f"   Date range: {df.index[0].strftime('%Y-%m-%d %H:%M')} to {df.index[-1].strftime('%Y-%m-%d %H:%M')}")
-            print(f"   Latest close price: {df['close'].iloc[-1]:.5f}")
-            print(f"   Highest price: {df['high'].max():.5f}")
-            print(f"   Lowest price: {df['low'].min():.5f}")
+        if "error" not in results:
+            print(f"Current weights: {results.get('current_weights', {})}")
+            print(f"Target weights: {results.get('target_weights', {})}")
+            print(f"Required trades: {results.get('required_trades', {})}")
+            
+            # Ask user if they want to execute
+            if results.get('required_trades'):
+                print("\n💡 To execute these trades, set dry_run=False in the rebalance_portfolio call")
         else:
-            print(f"   ❌ Failed to get historical data for {symbol}")
+            print(f"Rebalancing error: {results['error']}")
+
             
     except Exception as e:
         print(f"❌ Error occurred: {e}")
