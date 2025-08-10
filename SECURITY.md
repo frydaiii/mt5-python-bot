@@ -86,37 +86,6 @@ ENV MT5_PASSWORD=your_password
 ENV MT5_SERVER=YourBroker-Live
 ```
 
-## 🔄 Alternative Approaches
-
-### 1. Azure Key Vault (for Azure deployments)
-```python
-from azure.keyvault.secrets import SecretClient
-from azure.identity import DefaultAzureCredential
-
-credential = DefaultAzureCredential()
-client = SecretClient(vault_url="https://your-vault.vault.azure.net/", credential=credential)
-
-mt5_password = client.get_secret("mt5-password").value
-```
-
-### 2. AWS Systems Manager (for AWS deployments)
-```python
-import boto3
-
-ssm = boto3.client('ssm')
-response = ssm.get_parameter(Name='/mt5/password', WithDecryption=True)
-mt5_password = response['Parameter']['Value']
-```
-
-### 3. Configuration Files (less secure)
-```python
-import configparser
-
-config = configparser.ConfigParser()
-config.read('config.ini')
-mt5_password = config['MT5']['password']
-```
-
 ## 🚨 Emergency Procedures
 
 If credentials are compromised:
