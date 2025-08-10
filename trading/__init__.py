@@ -2,7 +2,7 @@
 Trading module for MT5 Trading Bot
 
 This module contains trading utilities, portfolio management,
-and related trading operations.
+alpha, and related trading operations.
 """
 
 # Import commonly used functions and classes for easy access
@@ -14,6 +14,11 @@ try:
         rebalance_portfolio,
         get_portfolio_summary,
         validate_allocations
+    )
+    from .alpha import (
+        alpha07,
+        calculate_alpha07_from_dataframe,
+        AlphaOperators
     )
 except ImportError:
     # Handle import errors gracefully if dependencies are missing
