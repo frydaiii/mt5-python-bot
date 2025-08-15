@@ -38,40 +38,25 @@ def main():
     print("✅ MT5 connection established successfully")
     
     try:
-        # Example: Get portfolio summary
-        print("\n📊 Getting current portfolio summary...")
-        summary = get_portfolio_summary()
+        # Example: Get symbol data for EURUSD
+        symbol = "EURUSDm"
+        timeframe = TIMEFRAMES['H1']  # 1-hour timeframe
         
-        if "error" not in summary:
-            print(f"Account Balance: ${summary.get('account_balance', 0):,.2f}")
-            print(f"Account Equity: ${summary.get('account_equity', 0):,.2f}")
-            print(f"Open Positions: {summary.get('number_of_positions', 0)}")
+        print(f"Fetching data for {symbol} on {timeframe} timeframe...")
+        data = get_symbol_data(symbol, timeframe)
+        
+        if data is not None:
+            print(f"📈 Data for {symbol}:\n{data.head()}")
         else:
-            print(f"Error getting portfolio summary: {summary['error']}")
+            print(f"❌ No data found for {symbol} on {timeframe} timeframe")
         
-        # Example: Portfolio rebalancing (dry run)
-        print("\n🎯 Example portfolio rebalancing...")
-        target_allocations = [
-            ("EURUSD", 0.4),   # 40% EUR/USD
-            ("GBPUSD", 0.3),   # 30% GBP/USD
-            ("USDJPY", 0.2),   # 20% USD/JPY
-            ("AUDUSD", 0.1),   # 10% AUD/USD
-        ]
-        
-        # Perform dry run
-        results = rebalance_portfolio(target_allocations, dry_run=True)
-        
-        if "error" not in results:
-            print(f"Current weights: {results.get('current_weights', {})}")
-            print(f"Target weights: {results.get('target_weights', {})}")
-            print(f"Required trades: {results.get('required_trades', {})}")
-            
-            # Ask user if they want to execute
-            if results.get('required_trades'):
-                print("\n💡 To execute these trades, set dry_run=False in the rebalance_portfolio call")
+        # Example: Get current price
+        current_price = get_current_price(symbol)
+        if current_price is not None:
+            print(f"💰 Current price of {symbol}: {current_price}")
         else:
-            print(f"Rebalancing error: {results['error']}")
-
+            print(f"❌ Failed to retrieve current price for {symbol}")
+        
             
     except Exception as e:
         print(f"❌ Error occurred: {e}")
